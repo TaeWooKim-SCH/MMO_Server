@@ -5,7 +5,7 @@
 
         static void Thread_1() {
             for (int i = 0; i< 100000; i++) {
-                Interlocked.Increment(ref number);
+                Interlocked.Increment(ref number); // 원자적으로 덧셈
 
                 // number++의 내부 로직;
                 //int temp = number;
@@ -16,7 +16,7 @@
 
         static void Thread_2() {
             for (int i = 0;i < 100000;i++) {
-                Interlocked.Decrement(ref number);
+                Interlocked.Decrement(ref number); // 원자적으로 뺄셈
 
                 // number--의 내부 로직;
                 //int temp = number;
