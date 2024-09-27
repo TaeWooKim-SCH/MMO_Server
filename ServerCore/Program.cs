@@ -2,26 +2,24 @@
     // 레이스 컨디션
     internal class Program {
         static int number = 0;
+        static object _obj = new object();
 
         static void Thread_1() {
+            // 상호배체 Mutual Exclusive
             for (int i = 0; i< 100000; i++) {
-                Interlocked.Increment(ref number); // 원자적으로 덧셈
 
-                // number++의 내부 로직;
-                //int temp = number;
-                //temp += 1;
-                //number = temp;
+                lock (_obj) {
+                    number++;
+                }
             }
         }
 
+        // 데드락(DeadLock) -> 죽은 상황
         static void Thread_2() {
             for (int i = 0;i < 100000;i++) {
-                Interlocked.Decrement(ref number); // 원자적으로 뺄셈
-
-                // number--의 내부 로직;
-                //int temp = number;
-                //temp -= 1;
-                //number = temp;
+                lock (_obj) {
+                    number--;
+                }
             }
         }
 
