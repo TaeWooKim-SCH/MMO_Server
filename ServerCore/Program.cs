@@ -1,52 +1,50 @@
 ﻿namespace ServerCore {
-    class SessionManager {
-        static object _lock = new object();
+    class SpinLock {
+        volatile int _locked = 0;
 
-        public static void TestSession() {
-            lock (_lock) {
+        public void Acquire() {
+            while (true) {
+                // 무작정 기다리는 방법
+                //int original = Interlocked.Exchange(ref _locked, 1);
+                //if (original == 0) {
+                //    break;
+                //}
 
+                // CAS Compare-And-Swap
+                //if (_locked == 0) {
+                //    _locked = 1;
+                //}
+                int expected = 0;
+                int desired = 1;
+                if (Interlocked.CompareExchange(ref _locked, desired, expected) == expected) {
+                    break;
+                }
             }
         }
 
-        public static void Test() {
-            lock (_lock) {
-                UserManager.TestUser();
-            }
-        }
-    }
-
-    class UserManager {
-        public static object _lock = new object();
-
-        public static void Test() {
-            lock (_lock) {
-                SessionManager.TestSession();
-            }
-        }
-
-        public static void TestUser() {
-            lock (_lock) {
-
-            }
+        public void Release() {
+            _locked = 0;
         }
     }
 
     // 레이스 컨디션
     internal class Program {
-        static int number = 0;
-        static object _obj = new object();
+        static int _num = 0;
+        static SpinLock _lock = new SpinLock();
 
         static void Thread_1() {
-            // 상호배체 Mutual Exclusive
-            for (int i = 0; i< 100000; i++) {
-                SessionManager.Test();
+            for (int i = 0; i < 1000000; i++) {
+                _lock.Acquire();
+                _num++;
+                _lock.Release();
             }
         }
-
-        // 데드락(DeadLock) -> 죽은 상황
+        
         static void Thread_2() {
-            for (int i = 0;i < 100;i++) {
-                UserManager.Test();
+            for (int i = 0; i < 1000000; i++) {
+                _lock.Acquire();
+                _num--;
+                _lock.Release();
             }
         }
 
@@ -55,14 +53,11 @@
             Task t2 = new Task(Thread_2);
 
             t1.Start();
-
-            Thread.Sleep(100);
-
             t2.Start();
 
             Task.WaitAll(t1, t2);
+            Console.WriteLine(_num);
 
-            Console.WriteLine(number);
         }
     }
 }
