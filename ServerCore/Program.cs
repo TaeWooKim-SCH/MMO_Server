@@ -1,61 +1,44 @@
 ﻿namespace ServerCore {
-    //class Lock {
-    //    // bool <- 커널
-    //    ManualResetEvent _available = new ManualResetEvent(false);
-
-    //    public void Acquire() {
-    //        _available.WaitOne(); // 입장 시도
-    //    }
-
-    //    public void Release() {
-    //        _available.Set();
-    //    }
-    //}class Lock {
-    //    // bool <- 커널
-    //    AutoResetEvent _available = new AutoResetEvent(true);
-
-    //    public void Acquire() {
-    //        _available.WaitOne(); // 입장 시도
-    //        //_available.Reset(); 위에 WaitOne 안에 들어가 있음
-    //    }
-
-    //    public void Release() {
-    //        _available.Set();
-    //    }
-    //}
-
-    // 레이스 컨디션
     internal class Program {
-        static int _num = 0;
-        //static Lock _lock = new Lock();
-        static Mutex _lock = new Mutex(); // 커널 객체
+        // 1. 근성
+        // 2. 양보
+        // 3. 갑질
 
-        static void Thread_1() {
-            for (int i = 0; i < 100000; i++) {
-                _lock.WaitOne();
-                _num++;
-                _lock.ReleaseMutex();
-            }
+        // 상호배제
+        // Monitor
+        static object _lock = new object();
+        static SpinLock _lock2 = new SpinLock();
+        static ReaderWriterLockSlim _lock3 = new ReaderWriterLockSlim();
+        // 직접 만든다
+
+        // [] [] [] [] [] -> 퀘스트 보상
+        class Reward {
+
         }
-        
-        static void Thread_2() {
-            for (int i = 0; i < 100000; i++) {
-                _lock.WaitOne();
-                _num--;
-                _lock.ReleaseMutex();
+
+
+        // 99.999999%
+        static Reward GetRewardById(int id) {
+            _lock3.EnterReadLock();
+            _lock3.ExitReadLock();
+
+            lock (_lock) {
+
             }
+
+            return null;
+        }
+
+        // 0.0000001%
+        static void AddReward(Reward reward) {
+            _lock3.EnterWriteLock();
+            _lock3.ExitReadLock();
         }
 
         static void Main(string[] args) {
-            Task t1 = new Task(Thread_1);
-            Task t2 = new Task(Thread_2);
-
-            t1.Start();
-            t2.Start();
-
-            Task.WaitAll(t1, t2);
-            Console.WriteLine(_num);
-
+            lock (_lock) {
+                
+            }
         }
     }
 }
