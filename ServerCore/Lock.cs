@@ -38,8 +38,9 @@ namespace ServerCore {
             // 아무도 Writelock을 획득하고 있지 않으면 ReadCount를 1 올린다
             while (true) {
                 for (int i = 0; i < MAX_SPIN_COUNT; i++) {
-                    int expected = (_flag & READ_MASK);
-                    if (Interlocked.CompareExchange(ref _flag, expected + 1, expected) == expected) {
+                    int expected = (_flag & READ_MASK); // A(0) B(0)
+                    if (Interlocked.CompareExchange(ref _flag, expected + 1, expected) == expected) { // A(0 -> 1) B(0 -> 1)
+                        
                         return;
                     }
                 }
@@ -49,7 +50,7 @@ namespace ServerCore {
         }
 
         public void ReadUnLock() {
-
+            Interlocked.Decrement(ref _flag);
         }
     }
 }
