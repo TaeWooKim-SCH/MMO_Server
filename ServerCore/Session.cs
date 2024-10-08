@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerCore {
-    internal abstract class Session {
+    public abstract class Session {
         Socket _socket;
         int _disconnected = 0;
 

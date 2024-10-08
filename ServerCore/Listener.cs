@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerCore {
-    internal class Listener {
+    public class Listener {
         Socket _listenSocket;
         Action<Socket> _onAcceptHandler;
         Func<Session> _sessionFactory;
